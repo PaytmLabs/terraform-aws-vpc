@@ -21,6 +21,18 @@ locals {
     var.tags,
     var.vpc_endpoint_tags,
   )
+
+  private_subnet_tags = merge(
+    { "global" = {} },
+    { for i in range(length(var.private_subnets)): i => {} },
+    var.private_subnet_tags
+  )
+
+  public_subnet_tags = merge(
+    { "global" = {} },
+    { for i in range(length(var.public_subnets)): i => {} },
+    var.public_subnet_tags
+  )
 }
 
 ######
@@ -347,7 +359,8 @@ resource "aws_subnet" "public" {
       )
     },
     var.tags,
-    var.public_subnet_tags,
+    local.public_subnet_tags["global"],
+    local.public_subnet_tags[count.index],
   )
 }
 
@@ -374,7 +387,8 @@ resource "aws_subnet" "private" {
       )
     },
     var.tags,
-    var.private_subnet_tags,
+    local.private_subnet_tags["global"],
+    local.private_subnet_tags[count.index],
   )
 }
 
